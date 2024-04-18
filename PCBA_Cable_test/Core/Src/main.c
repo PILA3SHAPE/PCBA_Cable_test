@@ -50,8 +50,10 @@ static uint8_t init[9] = {0x80, 0x28, 0x80, 0x0C, 0x80, 0x01, 0x02}; // init
 static uint8_t pin[6] = {0x80, 0x06, 0x62, 0x50, 0x49, 0x4E}; //pin
 
   uint8_t lineone[2] = {0x80, 0x06};
-  uint8_t linetwo[2] = {0x80, 0xC0};
-  uint8_t S_1[2] = {0x40, 0x31};
+  uint8_t linetwo_0[2] = {0x80, 0xC0};
+  uint8_t linetwo_3[2] = {0x80, 0xC3};
+  //uint8_t S_1[2] = {0x40, 0x31};
+  uint8_t S_1[3] = {0x40, 0x31, 0x20};
   //uint8_t S_1[2] = {64, 49};
   uint8_t S_2[2] = {0x40, 0x32};
   uint8_t S_3[2] = {0x40, 0x33};
@@ -74,10 +76,11 @@ static uint8_t pin[6] = {0x80, 0x06, 0x62, 0x50, 0x49, 0x4E}; //pin
 
 
   uint8_t space [3] = {0x40, 0x20, 0x20};
-  static int count;
-
-
-
+  //static int count;
+//  static int count = 0;
+ // int addr[4] = {0,0,0,0};
+  int binary_array[4];
+  const int size = 4;
 
 
 
@@ -94,7 +97,13 @@ static void MX_I2C1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+int power(int base, int exponent) {
+    int result = 1;
+    for (int i = 0; i < exponent; i++) {
+        result *= base;
+    }
+    return result;
+}
 /* USER CODE END 0 */
 
 /**
@@ -148,309 +157,74 @@ int main(void)
 	    //HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 	    //HAL_Delay(200);
 
-	  	  switch (count)
-	  	  {
 
 
 
-	  	  	  case 0:
-					  {
-						  HAL_GPIO_WritePin(GPIOC, ADDR0_Pin, GPIO_PIN_RESET); //address 0
-						  HAL_GPIO_WritePin(GPIOC, ADDR1_Pin, GPIO_PIN_RESET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR2_Pin, GPIO_PIN_RESET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR3_Pin, GPIO_PIN_RESET);
-						  HAL_Delay(100);
-						  count++;
+    for (int count = 0; count <= 15; count++) {
+//adresowanie multiplekserów od 0 to 15
 
-						  if (HAL_GPIO_ReadPin(GPIOA, Input1_Pin)==GPIO_PIN_SET || HAL_GPIO_ReadPin(GPIOA, Input2_Pin)==GPIO_PIN_SET)
-						  {
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo, 2, 100); // zmień linię na 2
-							  if (HAL_GPIO_ReadPin(GPIOA, Input1_Pin)==GPIO_PIN_SET)
-							  {
-								  //HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo, 2, 100); // zmień linię na 2
-								  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &S_1, 2, 100);  // pin 1
-							  }
+        int temp = count;
+        int n;
 
-							  if (HAL_GPIO_ReadPin(GPIOA, Input2_Pin)==GPIO_PIN_SET)
-							  {
-								  //HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo, 2, 100); // zmień linię na 2
-								  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &S_17, 3, 100);  // pin 1
-							  }
-						  }
+/*		if (count == 16)
+		{
+			 HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo_0, 2, 100);
+			 HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &space, 3, 100);
+			 HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo_3, 2, 100);
+			 HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &space, 3, 100);
 
-						  //HAL_Delay(100);
-						  break;
-					  }
+		} //else
+*/
+		{
+				//for (int i = size - 1; i >= 0; i--)
+				for (int i = 0; i < size; i++)
+				{
 
-	  	  	  case 1:
-	  				  {
-	  					  HAL_GPIO_WritePin(GPIOC, ADDR0_Pin, GPIO_PIN_SET); //address 1
-	  					  HAL_GPIO_WritePin(GPIOC, ADDR1_Pin, GPIO_PIN_RESET);
-	  					  HAL_GPIO_WritePin(GPIOC, ADDR2_Pin, GPIO_PIN_RESET);
-	  					  HAL_GPIO_WritePin(GPIOC, ADDR3_Pin, GPIO_PIN_RESET);
-	  					  count++;
-	  					  HAL_Delay(100);
-	  					  if (HAL_GPIO_ReadPin(GPIOA, Input1_Pin)==GPIO_PIN_SET)
-	  					  {
-	  						  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo, 2, 100); // zmień linię na 2
-	  						  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &S_2, 2, 100);  // pin 2
-	  					  }
+					n = power (2, i);
+					binary_array[i] = temp % 2;
+					if (binary_array[i] == 1)
+						{
+							HAL_GPIO_WritePin(GPIOC, n, GPIO_PIN_SET);
+							HAL_Delay(20);
+						}
+					else if(binary_array[i] == 0)
+						{
+							HAL_GPIO_WritePin(GPIOC, n, GPIO_PIN_RESET);
+							HAL_Delay(20);
+						}
 
-	  					  break;
-	  				  }
+					temp /= 2;
+//					HAL_Delay(50);
 
-	  	  	  case 2:
-	  	  		  	  {
-	  	  		  		  HAL_GPIO_WritePin(GPIOC, ADDR0_Pin, GPIO_PIN_RESET); //address 2
-	  	  		  		  HAL_GPIO_WritePin(GPIOC, ADDR1_Pin, GPIO_PIN_SET);
-	  	  		  		  HAL_GPIO_WritePin(GPIOC, ADDR2_Pin, GPIO_PIN_RESET);
-	  	  		  		  HAL_GPIO_WritePin(GPIOC, ADDR3_Pin, GPIO_PIN_RESET);
-	  	  		  		  count++;
-	  	  		  		  HAL_Delay(100);
-	  	  		  		  if (HAL_GPIO_ReadPin(GPIOA, Input1_Pin)==GPIO_PIN_SET)
-	  	  		  		  {
-	  	  		  			  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo, 2, 100); // zmień linię na 2
-	  	  		  		  	  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &S_3, 2, 100);  // pin 3
-	  	  		  		  }
+				}
 
-	  	  		  		  break;
-	  	  		  	  }
-	  	  	  case 3:
-	  	  		  	  {
-	  	  		  		  HAL_GPIO_WritePin(GPIOC, ADDR0_Pin, GPIO_PIN_SET); //address 2
-	  	  		  		  HAL_GPIO_WritePin(GPIOC, ADDR1_Pin, GPIO_PIN_SET);
-	  	  		  		  HAL_GPIO_WritePin(GPIOC, ADDR2_Pin, GPIO_PIN_RESET);
-	  	  		  		  HAL_GPIO_WritePin(GPIOC, ADDR3_Pin, GPIO_PIN_RESET);
-	  	  		  		  count++;
-	  	  		  		  HAL_Delay(100);
-	  	  		  		  if (HAL_GPIO_ReadPin(GPIOA, Input1_Pin)==GPIO_PIN_SET)
-	  	  		  		  {
-	  	  		  			  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo, 2, 100); // zmień linię na 2
-	  	  		  		  	  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &S_4, 2, 100);  // pin 4
-	  	  		  		  }
+				if (HAL_GPIO_ReadPin(GPIOA, Input1_Pin)==GPIO_PIN_SET)
 
-	  	  		  		  break;
-	  	  		  	  }
+					{
+						if (count <=9)
+						{
+							S_1[1] = 48 + count;
+							S_1[2] = 32;
+						}
+							else
+						{
+							S_1[1] = 49;
+							S_1[2] = 48 + count-10;
+						}
+						HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo_0, 2, 100); // zmień linię na 2
+						HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &S_1, 3, 100);  // pin 1
+//						HAL_Delay(150);
+					}
 
-	  	  	  case 4:
-	  	  		  	  {
-	  	  		  		  HAL_GPIO_WritePin(GPIOC, ADDR0_Pin, GPIO_PIN_RESET); //address 2
-	  	  		  		  HAL_GPIO_WritePin(GPIOC, ADDR1_Pin, GPIO_PIN_RESET);
-	  	  		  		  HAL_GPIO_WritePin(GPIOC, ADDR2_Pin, GPIO_PIN_SET);
-	  	  		  		  HAL_GPIO_WritePin(GPIOC, ADDR3_Pin, GPIO_PIN_RESET);
-	  	  		  		  count++;
-	  	  		  		  HAL_Delay(100);
-	  	  		  		  if (HAL_GPIO_ReadPin(GPIOA, Input1_Pin)==GPIO_PIN_SET)
-	  	  		  		  {
-	  	  		  			  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo, 2, 100); // zmień linię na 2
-	  	  		  		  	  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &S_5, 2, 100);  // pin 5
-	  	  		  		  }
-
-	  	  		  		  break;
-	  	  		  	  }
-	  	  	  case 5:
-					  {
-						  HAL_GPIO_WritePin(GPIOC, ADDR0_Pin, GPIO_PIN_SET); //address 2
-						  HAL_GPIO_WritePin(GPIOC, ADDR1_Pin, GPIO_PIN_RESET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR2_Pin, GPIO_PIN_SET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR3_Pin, GPIO_PIN_RESET);
-						  count++;
-						  HAL_Delay(100);
-						  if (HAL_GPIO_ReadPin(GPIOA, Input1_Pin)==GPIO_PIN_SET)
-						  {
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo, 2, 100); // zmień linię na 2
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &S_6, 2, 100);  // pin 6
-						  }
-
-						  break;
-					  }
+				if (HAL_GPIO_ReadPin(GPIOA, Input2_Pin)==GPIO_PIN_SET)
+					{
+					  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo_3, 2, 100); // zmień linię na 2
+					  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &S_17, 3, 100);  // pin 1
+					}
+		}
 
 
-	  	  	  case 6:
-					  {
-						  HAL_GPIO_WritePin(GPIOC, ADDR0_Pin, GPIO_PIN_RESET); //address 2
-						  HAL_GPIO_WritePin(GPIOC, ADDR1_Pin, GPIO_PIN_SET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR2_Pin, GPIO_PIN_SET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR3_Pin, GPIO_PIN_RESET);
-						  count++;
-						  HAL_Delay(100);
-						  if (HAL_GPIO_ReadPin(GPIOA, Input1_Pin)==GPIO_PIN_SET)
-						  {
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo, 2, 100); // zmień linię na 2
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &S_7, 2, 100);  // pin 7
-						  }
-
-						  break;
-					  }
-
-
-	  	  	  case 7:
-					  {
-						  HAL_GPIO_WritePin(GPIOC, ADDR0_Pin, GPIO_PIN_SET); //address 2
-						  HAL_GPIO_WritePin(GPIOC, ADDR1_Pin, GPIO_PIN_SET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR2_Pin, GPIO_PIN_SET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR3_Pin, GPIO_PIN_RESET);
-						  count++;
-						  HAL_Delay(100);
-						  if (HAL_GPIO_ReadPin(GPIOA, Input1_Pin)==GPIO_PIN_SET)
-						  {
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo, 2, 100); // zmień linię na 2
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &S_8, 2, 100);  // pin 8
-						  }
-
-						  break;
-					  }
-	  	  	  case 8:
-					  {
-						  HAL_GPIO_WritePin(GPIOC, ADDR0_Pin, GPIO_PIN_RESET); //address 2
-						  HAL_GPIO_WritePin(GPIOC, ADDR1_Pin, GPIO_PIN_RESET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR2_Pin, GPIO_PIN_RESET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR3_Pin, GPIO_PIN_SET);
-						  count++;
-						  HAL_Delay(100);
-						  if (HAL_GPIO_ReadPin(GPIOA, Input1_Pin)==GPIO_PIN_SET)
-						  {
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo, 2, 100); // zmień linię na 2
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &S_9, 2, 100);  // pin 9
-						  }
-
-						  break;
-					  }
-
-
-	  	  	  case 9:
-					  {
-						  HAL_GPIO_WritePin(GPIOC, ADDR0_Pin, GPIO_PIN_SET); //address 2
-						  HAL_GPIO_WritePin(GPIOC, ADDR1_Pin, GPIO_PIN_RESET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR2_Pin, GPIO_PIN_RESET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR3_Pin, GPIO_PIN_SET);
-						  count++;
-						  HAL_Delay(100);
-						  if (HAL_GPIO_ReadPin(GPIOA, Input1_Pin)==GPIO_PIN_SET)
-						  {
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo, 2, 100); // zmień linię na 2
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &S_10, 3, 100);  // pin 10
-						  }
-
-						  break;
-					  }
-
-	  	  	  case 10:
-					  {
-						  HAL_GPIO_WritePin(GPIOC, ADDR0_Pin, GPIO_PIN_RESET); //address 2
-						  HAL_GPIO_WritePin(GPIOC, ADDR1_Pin, GPIO_PIN_SET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR2_Pin, GPIO_PIN_RESET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR3_Pin, GPIO_PIN_SET);
-						  count++;
-						  HAL_Delay(100);
-						  if (HAL_GPIO_ReadPin(GPIOA, Input1_Pin)==GPIO_PIN_SET)
-						  {
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo, 2, 100); // zmień linię na 2
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &S_11, 3, 100);  // pin 11
-						  }
-
-						  break;
-					  }
-
-	  	  	  case 11:
-					  {
-						  HAL_GPIO_WritePin(GPIOC, ADDR0_Pin, GPIO_PIN_SET); //address 2
-						  HAL_GPIO_WritePin(GPIOC, ADDR1_Pin, GPIO_PIN_SET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR2_Pin, GPIO_PIN_RESET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR3_Pin, GPIO_PIN_SET);
-						  count++;
-						  HAL_Delay(100);
-						  if (HAL_GPIO_ReadPin(GPIOA, Input1_Pin)==GPIO_PIN_SET)
-						  {
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo, 2, 100); // zmień linię na 2
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &S_12, 3, 100);  // pin 12
-						  }
-
-						  break;
-					  }
-	  	  	  case 12:
-					  {
-						  HAL_GPIO_WritePin(GPIOC, ADDR0_Pin, GPIO_PIN_RESET); //address 2
-						  HAL_GPIO_WritePin(GPIOC, ADDR1_Pin, GPIO_PIN_RESET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR2_Pin, GPIO_PIN_SET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR3_Pin, GPIO_PIN_SET);
-						  count++;
-						  HAL_Delay(100);
-						  if (HAL_GPIO_ReadPin(GPIOA, Input1_Pin)==GPIO_PIN_SET)
-						  {
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo, 2, 100); // zmień linię na 2
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &S_13, 3, 100);  // pin 13
-						  }
-
-						  break;
-					  }
-
-	  	  	  case 13:
-					  {
-						  HAL_GPIO_WritePin(GPIOC, ADDR0_Pin, GPIO_PIN_SET); //address 2
-						  HAL_GPIO_WritePin(GPIOC, ADDR1_Pin, GPIO_PIN_RESET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR2_Pin, GPIO_PIN_SET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR3_Pin, GPIO_PIN_SET);
-						  count++;
-						  HAL_Delay(100);
-						  if (HAL_GPIO_ReadPin(GPIOA, Input1_Pin)==GPIO_PIN_SET)
-						  {
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo, 2, 100); // zmień linię na 2
-						  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &S_14, 3, 100);  // pin 14
-						  }
-
-						  break;
-					  }
-
-	  	  	  case 14:
-					  {
-						  HAL_GPIO_WritePin(GPIOC, ADDR0_Pin, GPIO_PIN_RESET); //address 2
-						  HAL_GPIO_WritePin(GPIOC, ADDR1_Pin, GPIO_PIN_SET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR2_Pin, GPIO_PIN_SET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR3_Pin, GPIO_PIN_SET);
-						  count++;
-						  HAL_Delay(100);
-						  if (HAL_GPIO_ReadPin(GPIOA, Input1_Pin)==GPIO_PIN_SET)
-						  {
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo, 2, 100); // zmień linię na 2
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &S_15, 3, 100);  // pin 15
-						  }
-
-						  break;
-					  }
-
-	  	  	  case 15:
-					  {
-						  HAL_GPIO_WritePin(GPIOC, ADDR0_Pin, GPIO_PIN_SET); //address 2
-						  HAL_GPIO_WritePin(GPIOC, ADDR1_Pin, GPIO_PIN_SET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR2_Pin, GPIO_PIN_SET);
-						  HAL_GPIO_WritePin(GPIOC, ADDR3_Pin, GPIO_PIN_SET);
-						  count++;
-						  HAL_Delay(100);
-						  if (HAL_GPIO_ReadPin(GPIOA, Input1_Pin)==GPIO_PIN_SET)
-						  {
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo, 2, 100); // zmień linię na 2
-							  HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &S_16, 3, 100);  // pin 16
-						  }
-
-						  break;
-					  }
-
-	  	  	  default:
-					  {
-						 HAL_Delay(1000);
-						 HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &linetwo, 2, 100);
-						 HAL_I2C_Master_Transmit(&hi2c1, 0x7C, &space, 3, 100);
-						 //HAL_Delay(10);
-						 HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-						 count = 0;
-
-					  }
-
-
-
-	  	  }
-
+    }
 
 
   }
