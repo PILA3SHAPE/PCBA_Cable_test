@@ -72,12 +72,12 @@ void Error_Handler(void);
 #define Input1_GPIO_Port GPIOA
 #define Input2_Pin GPIO_PIN_1
 #define Input2_GPIO_Port GPIOA
-#define Input3_Pin GPIO_PIN_2
-#define Input3_GPIO_Port GPIOA
-#define USART_RX_Pin GPIO_PIN_3
-#define USART_RX_GPIO_Port GPIOA
 #define LD2_Pin GPIO_PIN_5
 #define LD2_GPIO_Port GPIOA
+#define Input3_Pin GPIO_PIN_4
+#define Input3_GPIO_Port GPIOC
+#define Input4_Pin GPIO_PIN_5
+#define Input4_GPIO_Port GPIOC
 #define TMS_Pin GPIO_PIN_13
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
